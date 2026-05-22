@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import api from '../../api/axios'
 
 const initialState = {
-  user: null,
   token: localStorage.getItem('token') || null,
   isLoading: false,
   isError: false,
+  isSuccess: false,
   message: '',
 }
 
@@ -15,12 +15,29 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await api.post('/login', payload)
 
-      localStorage.setItem('token', response.data.data.token)
+      const token = response.data.data.token
 
-      return response.data.data
+      localStorage.setItem('token', token)
+
+      return token
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Login gagal'
+        error.response?.data?.message ||
+          'Login gagal'
+      )
+    }
+  }
+)
+
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (payload, thunkAPI) => {
+    try {
+      const response = await api.post('/registration', payload)
+      return response.data.message
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || 'Registrasi gagal'
       )
     }
   }
@@ -31,8 +48,14 @@ const authSlice = createSlice({
   initialState,
 
   reducers: {
+    resetState: (state) => {
+      state.isLoading = false
+      state.isError = false
+      state.isSuccess = false
+      state.message = ''
+    },
+
     logout: (state) => {
-      state.user = null
       state.token = null
 
       localStorage.removeItem('token')
@@ -48,7 +71,8 @@ const authSlice = createSlice({
 
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false
-        state.token = action.payload.token
+        state.isSuccess = true
+        state.token = action.payload
       })
 
       .addCase(loginUser.rejected, (state, action) => {
@@ -56,9 +80,26 @@ const authSlice = createSlice({
         state.isError = true
         state.message = action.payload
       })
+
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.isSuccess = true
+        state.message = action.payload
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false
+        state.isError = true
+        state.message = action.payload
+      })
   },
 })
 
-export const { logout } = authSlice.actions
+export const {
+  resetState,
+  logout,
+} = authSlice.actions
 
 export default authSlice.reducer
