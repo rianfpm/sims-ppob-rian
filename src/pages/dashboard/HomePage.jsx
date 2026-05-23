@@ -1,59 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from '../../components/Navbar'
-
-import iconPBB from '../../assets/icon/PBB.png'
-import iconListrik from '../../assets/icon/Listrik.png'
-import iconPulsa from '../../assets/icon/Pulsa.png'
-import iconPDAM from '../../assets/icon/PDAM.png'
-import iconPGN from '../../assets/icon/PGN.png'
-import iconTV from '../../assets/icon/Televisi.png'
-import iconMusik from '../../assets/icon/Musik.png'
-import iconGame from '../../assets/icon/Game.png'
-import iconMakanan from '../../assets/icon/Voucher Makanan.png'
-import iconKurban from '../../assets/icon/Kurban.png'
-import iconZakat from '../../assets/icon/Zakat.png'
-import iconPaketData from '../../assets/icon/Paket Data.png'
+import api from '../../api/axios'
 
 import profilePhoto from '../../assets/icon/Profile Photo.png'
 
-import banner1 from '../../assets/banner/Banner 1.png'
-import banner2 from '../../assets/banner/Banner 2.png'
-import banner3 from '../../assets/banner/Banner 3.png'
-import banner4 from '../../assets/banner/Banner 4.png'
-import banner5 from '../../assets/banner/Banner 5.png'
-
-const services = [
-  { name: 'PBB', icon: iconPBB },
-  { name: 'Listrik', icon: iconListrik },
-  { name: 'Pulsa', icon: iconPulsa },
-  { name: 'PDAM', icon: iconPDAM },
-  { name: 'PGN', icon: iconPGN },
-  { name: 'TV Langganan', icon: iconTV },
-  { name: 'Musik', icon: iconMusik },
-  { name: 'Voucher Game', icon: iconGame },
-  { name: 'Voucher Makanan', icon: iconMakanan },
-  { name: 'Kurban', icon: iconKurban },
-  { name: 'Zakat', icon: iconZakat },
-  { name: 'Paket Data', icon: iconPaketData },
-]
-
-const banners = [
-  { id: 1, image: banner1 },
-  { id: 2, image: banner2 },
-  { id: 3, image: banner3 },
-  { id: 4, image: banner4 },
-  { id: 5, image: banner5 },
-]
-
 export default function HomePage() {
   const [showSaldo, setShowSaldo] = useState(false)
-  
-  const userData = {
-    first_name: 'Rian',
-    last_name: 'Fauzi',
-    profile_image: profilePhoto,
-    balance: 150000,
-  }
+  const [services, setServices] = useState([])
+  const [banners, setBanners] = useState([])
+  const [profile, setProfile] = useState(null)
+  const [balance, setBalance] = useState(0)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [servicesRes, bannersRes, profileRes, balanceRes] = await Promise.all([
+          api.get('/services'),
+          api.get('/banner'),
+          api.get('/profile'),
+          api.get('/balance')
+        ])
+        
+        if (servicesRes.data.status === 0) {
+          setServices(servicesRes.data.data)
+        }
+        if (bannersRes.data.status === 0) {
+          setBanners(bannersRes.data.data)
+        }
+        if (profileRes.data.status === 0) {
+          setProfile(profileRes.data.data)
+        }
+        if (balanceRes.data.status === 0) {
+          setBalance(balanceRes.data.data.balance)
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -71,15 +57,16 @@ export default function HomePage() {
         <section className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
           <div className="w-full md:w-1/2">
             <img
-              src={userData.profile_image}
+              src={profile?.profile_image && profile.profile_image.includes('http') && !profile.profile_image.includes('null') ? profile.profile_image : profilePhoto}
               alt="Profile"
               className="w-20 h-20 rounded-full mb-4 object-cover border border-gray-200"
             />
             <p className="text-gray-600 text-lg">Selamat datang,</p>
-            <h1 className="text-3xl font-bold">{userData.first_name} {userData.last_name}</h1>
+            <h1 className="text-3xl font-bold">
+              {profile ? `${profile.first_name} ${profile.last_name}` : 'Loading...'}
+            </h1>
           </div>
           <div className="w-full md:w-1/2 bg-red-500 rounded-xl p-6 text-white shadow-md relative overflow-hidden">
-            {/* Hiasan background card */}
             <div className="absolute top-0 right-0 w-64 h-full opacity-20 hidden md:block">
               <svg viewBox="0 0 200 100" className="w-full h-full">
                 <path
@@ -91,7 +78,7 @@ export default function HomePage() {
             
             <p className="mb-2 text-sm z-10 relative">Saldo anda</p>
             <h2 className="text-4xl font-bold mb-4 z-10 relative">
-              {showSaldo ? formatRupiah(userData.balance) : 'Rp ••••••••'}
+              {showSaldo ? formatRupiah(balance) : 'Rp ••••••••'}
             </h2>
             <button
               onClick={() => setShowSaldo(!showSaldo)}
@@ -112,10 +99,10 @@ export default function HomePage() {
         <section className="mb-12">
           <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-y-8 gap-x-2">
             {services.map((srv, idx) => (
-              <div key={idx} className="flex flex-col items-center cursor-pointer hover:opacity-80 transition group">
-                <img src={srv.icon} alt={srv.name} className="w-14 h-14 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-xs text-center text-gray-700 max-w-[70px] leading-tight font-medium">
-                  {srv.name}
+              <div key={idx} className="flex flex-col items-center cursor-pointer hover:opacity-80 transition group text-center">
+                <img src={srv.service_icon} alt={srv.service_name} className="w-14 h-14 mb-2 group-hover:scale-110 transition-transform" />
+                <span className="text-xs text-gray-700 max-w-[70px] leading-tight font-medium">
+                  {srv.service_name}
                 </span>
               </div>
             ))}
@@ -125,11 +112,11 @@ export default function HomePage() {
         <section>
           <h3 className="font-semibold text-lg mb-4">Temukan promo menarik</h3>
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-            {banners.map((banner) => (
-              <div key={banner.id} className="min-w-[280px] md:min-w-[320px] snap-center">
+            {banners.map((banner, idx) => (
+              <div key={idx} className="min-w-[280px] md:min-w-[320px] snap-center">
                 <img
-                  src={banner.image}
-                  alt={`Promo ${banner.id}`}
+                  src={banner.banner_image}
+                  alt={banner.banner_name}
                   className="w-full h-auto rounded-xl object-cover"
                 />
               </div>

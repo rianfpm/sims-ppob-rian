@@ -31,7 +31,6 @@ export default function LoginPage() {
   useEffect(() => {
     if (isError) {
       setShowErrorAlert(true)
-      // toast.error(message) // Opsional, kita gunakan alert custom di bawah
       dispatch(resetState())
     }
 
