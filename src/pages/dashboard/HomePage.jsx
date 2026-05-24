@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../../components/Navbar'
 import api from '../../api/axios'
 
 import profilePhoto from '../../assets/icon/Profile Photo.png'
 
 export default function HomePage() {
+  const navigate = useNavigate()
+
   const [showSaldo, setShowSaldo] = useState(false)
   const [services, setServices] = useState([])
   const [banners, setBanners] = useState([])
@@ -99,7 +102,11 @@ export default function HomePage() {
         <section className="mb-12">
           <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-y-8 gap-x-2">
             {services.map((srv, idx) => (
-              <div key={idx} className="flex flex-col items-center cursor-pointer hover:opacity-80 transition group text-center">
+              <div 
+                key={idx} 
+                onClick={() => navigate('/payment', { state: { service: srv } })}
+                className="flex flex-col items-center cursor-pointer hover:opacity-80 transition group text-center"
+              >
                 <img src={srv.service_icon} alt={srv.service_name} className="w-14 h-14 mb-2 group-hover:scale-110 transition-transform" />
                 <span className="text-xs text-gray-700 max-w-[70px] leading-tight font-medium">
                   {srv.service_name}
