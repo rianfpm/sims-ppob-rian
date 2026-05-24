@@ -4,10 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "serve -s build",
+    "build": "react-scripts build"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -21,6 +19,7 @@
     "react-router-dom": "^7.15.1",
     "react-toastify": "^11.1.0",
     "redux-persist": "^6.0.0",
+    "serve": "^14.2.6",
     "yup": "^1.7.1"
   },
   "devDependencies": {
