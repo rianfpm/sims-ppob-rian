@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "serve -s build",
-    "build": "react-scripts build"
+    "dev": "vite",
+    "build": "vite build",
+    "start": "serve -s dist",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
