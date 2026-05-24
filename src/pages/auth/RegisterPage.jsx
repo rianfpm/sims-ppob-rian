@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { registerUser, resetState } from '../../features/auth/authSlices'
 
-import logo from '../../assets/icon/logo.png'
+import logo from '../../assets/icon/Logo.png'
 import loginImage from '../../assets/img/Illustrasi Login.png'
 
 export default function RegisterPage() {
